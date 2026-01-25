@@ -20,10 +20,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://frontend-treva-p1kf.vercel.app/',
-    ],
+    origin: ['http://localhost:3000', 'https://frontend-treva-p1kf.vercel.app'],
     credentials: true,
   });
 
