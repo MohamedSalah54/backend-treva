@@ -18,10 +18,14 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  
+
+  // app.enableCors({
+  //   origin: ['http://localhost:3000', 'http://192.168.1.6:3000'],
+  //   credentials: true,
+  // });
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://192.168.1.6:3000'], 
-    credentials: true, 
+    origin: true,
+    credentials: true,
   });
 
   const port = process.env.PORT || 3001;
