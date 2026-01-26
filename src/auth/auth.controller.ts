@@ -35,11 +35,11 @@ export class AuthController {
     //   sameSite: 'lax',
     //   maxAge: 24 * 60 * 60 * 1000,
     // });
-res.cookie('access_token', accessToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-});
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
 
     return {
       message: 'logged in successfully',
@@ -94,9 +94,8 @@ res.cookie('access_token', accessToken, {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      secure: true,
+      sameSite: 'none',
     });
 
     return {
