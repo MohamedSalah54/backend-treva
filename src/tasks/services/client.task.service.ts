@@ -66,14 +66,14 @@ export class ClientTaskService {
         throw new ForbiddenException('Not allowed to comment on this task');
       }
 
-      if (
-        task.status === TaskStatus.UNDER_REVIEW ||
-        task.status === TaskStatus.COMPLETED
-      ) {
-        throw new ForbiddenException(
-          'Cannot comment on this task in its current status',
-        );
-      }
+      // if (
+      //   task.status === TaskStatus.UNDER_REVIEW ||
+      //   task.status === TaskStatus.COMPLETED
+      // ) {
+      //   throw new ForbiddenException(
+      //     'Cannot comment on this task in its current status',
+      //   );
+      // }
     }
 
     if (!isAdmin && !isClientOwner) {
@@ -178,28 +178,90 @@ export class ClientTaskService {
     return task;
   }
 
-  async updateTaskStatus(
-    taskId: string,
-    dto: UpdateTaskDto,
-    user: { sub: string; role: UserRoles },
-  ) {
-    const task = await this.taskRepo.findOne({ filter: { _id: taskId } });
-    if (!task) throw new NotFoundException('Task not found');
+  // async updateTaskStatus(
+  //   taskId: string,
+  //   dto: UpdateTaskDto,
+  //   user: { sub: string; role: UserRoles },
+  // ) {
+  //   const task = await this.taskRepo.findOne({ filter: { _id: taskId } });
+  //   if (!task) throw new NotFoundException('Task not found');
 
-    if (
-      user.role === UserRoles.CLIENT &&
-      task.createdBy.toString() !== user.sub
-    ) {
-      throw new ForbiddenException('Clients can only edit their own tasks');
+  //   if (
+  //     user.role === UserRoles.CLIENT &&
+  //     task.createdBy.toString() !== user.sub
+  //   ) {
+  //     throw new ForbiddenException('Clients can only edit their own tasks');
+  //   }
+
+  //   const updateData =
+  //     user.role === UserRoles.CLIENT ? { status: dto.status } : dto;
+
+  //   return this.taskRepo.updateOne({
+  //     filter: { _id: taskId },
+  //     update: { $set: updateData },
+  //     options: { new: true },
+  //   });
+  // }
+async updateTaskStatus(
+  taskId: string,
+  dto: UpdateTaskDto,
+  user: { sub: string; role: UserRoles },
+) {
+  const task = await this.taskRepo.findOne({ filter: { _id: taskId } });
+  if (!task) throw new NotFoundException('Task not found');
+
+  if (
+    user.role === UserRoles.CLIENT &&
+    task.createdBy.toString() !== user.sub
+  ) {
+    throw new ForbiddenException('Clients can only edit their own tasks');
+  }
+
+  if (user.role === UserRoles.CLIENT) {
+    const next = dto.status as TaskStatus;
+
+    const allowed: TaskStatus[] = [
+      TaskStatus.AVAILABLE,
+      TaskStatus.IN_PROGRESS,
+      TaskStatus.UNDER_REVIEW,
+      TaskStatus.COMPLETED,
+    ];
+    if (!allowed.includes(next)) {
+      throw new BadRequestException('Invalid status');
     }
 
-    const updateData =
-      user.role === UserRoles.CLIENT ? { status: dto.status } : dto;
+    const isBackFromCompleted =
+      task.status === TaskStatus.COMPLETED &&
+      (next === TaskStatus.UNDER_REVIEW ||
+        next === TaskStatus.IN_PROGRESS ||
+        next === TaskStatus.AVAILABLE);
+
+    const finalStatus = isBackFromCompleted ? TaskStatus.AVAILABLE : next;
+
+    // ✅ لو رجعنا Available: امسح submission
+    const update: any = { status: finalStatus };
+
+    if (finalStatus === TaskStatus.AVAILABLE) {
+      update.submission = null; 
+      update.adminReview = null;
+      update.assignedUserId = null; 
+    }
 
     return this.taskRepo.updateOne({
       filter: { _id: taskId },
-      update: { $set: updateData },
+      update: { $set: update },
       options: { new: true },
     });
   }
+
+  // admin: يقدر يحدث أي حاجة
+  return this.taskRepo.updateOne({
+    filter: { _id: taskId },
+    update: { $set: dto },
+    options: { new: true },
+  });
+}
+
+
+
 }
