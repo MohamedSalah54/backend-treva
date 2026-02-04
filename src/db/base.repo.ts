@@ -34,7 +34,6 @@ interface IUpdateOne<T> {
   options?: QueryOptions;
 }
 
-// abstract (no instantiating)
 export abstract class BaseRepo<T> {
   constructor(private readonly model: Model<T>) {}
 

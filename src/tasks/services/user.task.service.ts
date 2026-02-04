@@ -63,7 +63,7 @@ export class UserTaskService {
 
     return result;
   }
-  
+
   // async getTaskById(taskId: string, userId?: string, role?: string) {
   //   const task = await this.taskRepo
   //     .findOne({ filter: { _id: taskId } })
@@ -74,20 +74,18 @@ export class UserTaskService {
 
   //   return task;
   // }
-  
-async getTaskById(taskId: string, userId?: string, role?: string) {
-  const task = await this.taskRepo
-    .findOne({ filter: { _id: taskId } })
-    .populate('createdBy', 'firstName lastName profileImage')
-    .populate('assignedUserId', 'firstName lastName profileImage') // <--- مهم
-    .populate('comments.userId', 'firstName lastName profileImage');
 
-  if (!task) throw new NotFoundException('Task not found');
+  async getTaskById(taskId: string, userId?: string, role?: string) {
+    const task = await this.taskRepo
+      .findOne({ filter: { _id: taskId } })
+      .populate('createdBy', 'firstName lastName profileImage')
+      .populate('assignedUserId', 'firstName lastName profileImage') // <--- مهم
+      .populate('comments.userId', 'firstName lastName profileImage');
 
-  return task;
-}
+    if (!task) throw new NotFoundException('Task not found');
 
-
+    return task;
+  }
 
   async takeTask(taskId: string, userId: string) {
     const user = await this.userRepo.updateOne({
@@ -103,10 +101,16 @@ async getTaskById(taskId: string, userId?: string, role?: string) {
     // const oneHourLater = new Date(Date.now() + 5 * 1000); // 5 sec
     const task = await this.taskRepo.updateOne({
       filter: { _id: new Types.ObjectId(taskId), status: TaskStatus.AVAILABLE },
+      // update: {
+      //   status: TaskStatus.IN_PROGRESS,
+      //   assignedUserId: new Types.ObjectId(userId),
+      //   expiresAt: oneHourLater,
+      // },
       update: {
         status: TaskStatus.IN_PROGRESS,
         assignedUserId: new Types.ObjectId(userId),
         expiresAt: oneHourLater,
+        commentsEnabled: false,
       },
     });
 

@@ -11,7 +11,12 @@ import {
   NotFoundException,
   Query,
 } from '@nestjs/common';
-import { CreateTaskDto, UpdateTaskDto, AddTaskCommentDto } from '../dto';
+import {
+  CreateTaskDto,
+  UpdateTaskDto,
+  AddTaskCommentDto,
+  SetClientReviewDto,
+} from '../dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { UserRoles } from 'src/common/enum';
 import { ClientTaskService } from '../services/client.task.service';
@@ -104,5 +109,24 @@ export class ClientTaskController {
     return { message: 'Task updated', statusCode: 200, data: task };
   }
 
-
+  @UseGuards(AuthGuard)
+  @Post(':id/review')
+  setClientReview(
+    @Param('id') id: string,
+    @Body() dto: SetClientReviewDto,
+    @Req() req: any,
+  ) {
+    return this.clientTaskService.setClientReview(
+      id,
+      req.user.sub,
+      req.user.role,
+      dto.clientReview,
+    );
+  }
+  
+  @UseGuards(AuthGuard)
+  @Post(':id/can-download')
+  canDownload(@Param('id') id: string, @Req() req: any) {
+    return this.clientTaskService.canDownload(id, req.user.sub, req.user.role);
+  }
 }

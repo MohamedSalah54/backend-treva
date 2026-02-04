@@ -13,7 +13,9 @@ export class ImageController {
   constructor(private readonly cloudService: CloudService) {}
 
   @Post('profile')
-  @UseInterceptors(FileInterceptor('file', multerOptions(['image/jpeg', 'image/png'])))
+  @UseInterceptors(
+    FileInterceptor('file', multerOptions(['image/jpeg', 'image/png'])),
+  )
   async uploadProfile(@UploadedFile() file: Express.Multer.File) {
     const { public_id, secure_url } = await this.cloudService.uploadFile({
       path: file.path,
@@ -23,13 +25,26 @@ export class ImageController {
   }
 
   @Post('tasks')
-  @UseInterceptors(FileInterceptor('file', multerOptions(['image/jpeg', 'image/png'])))
+  @UseInterceptors(
+    FileInterceptor('file', multerOptions(['image/jpeg', 'image/png'])),
+  )
   async uploadCourse(@UploadedFile() file: Express.Multer.File) {
-    const { public_id, secure_url } = await this.cloudService.uploadFile({
-      path: file.path,
-      folder: 'tasks',
-    });
-    return { public_id, secure_url };
+    // const { public_id, secure_url } = await this.cloudService.uploadFile({
+    //   path: file.path,
+    //   folder: 'tasks',
+    // });
+    // return { public_id, secure_url };
+    const { public_id, secure_url, preview_url } =
+      await this.cloudService.uploadFile({
+        
+        path: file.path,
+        folder: 'tasks',
+      });
+      
+
+    return {
+      original: { public_id, secure_url },
+      preview: { secure_url: preview_url },
+    };
   }
 }
-

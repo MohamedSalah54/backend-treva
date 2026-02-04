@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -59,9 +60,22 @@ export class UpdateTaskDto {
   isPaid?: boolean;
 }
 
+// export class SubmitTaskDto {
+//   @IsArray()
+//   images: IImage[];
+// }
+
 export class SubmitTaskDto {
   @IsArray()
-  images: IImage[];
+  images: {
+    original: {
+      secure_url: string;
+      public_id: string;
+    };
+    preview: {
+      secure_url: string;
+    };
+  }[];
 }
 
 export class AdminReviewDto {
@@ -74,4 +88,9 @@ export class AdminReviewDto {
   @IsArray()
   @IsOptional()
   images?: IImage[];
+}
+
+export class SetClientReviewDto {
+  @IsIn(["yes", "no"])
+  clientReview: "yes" | "no";
 }

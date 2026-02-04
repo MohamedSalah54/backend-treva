@@ -19,3 +19,5 @@ export enum AdminDecision {
   UNDER_REVIEW = 'under_review'
 }
 
+
+export type ClientReview = "yes" | "no";

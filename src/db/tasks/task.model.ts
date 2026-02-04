@@ -74,9 +74,9 @@
 // export const TaskSchema = SchemaFactory.createForClass(Task);
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Types } from 'mongoose';
-import { IImage } from '../user/user.model';
-import { AdminDecision, TaskStatus } from 'src/common/enum';
+import { HydratedDocument, Types } from 'mongoose';
+import { IImage, ISubmissionImage } from '../user/user.model';
+import { AdminDecision, ClientReview, TaskStatus } from 'src/common/enum';
 import { TaskComment, TaskCommentSchema } from './task-comment.schema';
 
 export type TTask = HydratedDocument<Task> & {
@@ -85,7 +85,7 @@ export type TTask = HydratedDocument<Task> & {
 };
 
 @Schema({
-  timestamps: true, // timestamps true -> Mongoose يضيف createdAt و updatedAt
+  timestamps: true,
   versionKey: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
@@ -115,14 +115,43 @@ export class Task {
   @Prop({ type: Date })
   expiresAt?: Date;
 
+  // @Prop({
+  //   type: {
+  //     images: [{ secure_url: String, public_id: String, folderId: String }],
+  //     submittedAt: Date,
+  //   },
+  // })
+  // submission?: {
+  //   images: ISubmissionImage[];
+  //   submittedAt: Date;
+  // };
+
   @Prop({
     type: {
-      images: [{ secure_url: String, public_id: String, folderId: String }],
+      images: [
+        {
+          original: {
+            secure_url: String,
+            public_id: String,
+          },
+          preview: {
+            secure_url: String,
+          },
+        },
+      ],
       submittedAt: Date,
     },
   })
   submission?: {
-    images: IImage[];
+    images: {
+      original: {
+        secure_url: string;
+        public_id: string;
+      };
+      preview: {
+        secure_url: string;
+      };
+    }[];
     submittedAt: Date;
   };
 
@@ -130,7 +159,7 @@ export class Task {
     type: [TaskCommentSchema],
     default: [],
   })
-  comments: TaskComment[];  
+  comments: TaskComment[];
 
   @Prop({ type: Boolean, default: false })
   isPaid: boolean;
@@ -151,6 +180,9 @@ export class Task {
     reviewedAt: Date;
     adminId: Types.ObjectId;
   };
+
+  @Prop({ type: String, enum: ['yes', 'no'], default: null })
+  clientReview?: ClientReview | null;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

@@ -8,6 +8,11 @@ export interface IImage {
   public_id: string;
   folderId?: string;
 }
+export type ISubmissionImage = {
+  original: IImage; 
+  preview: IImage;  
+};
+
 export type TUser = HydratedDocument<User> & Document;
 
 @Schema({
